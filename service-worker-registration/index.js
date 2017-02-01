@@ -6,6 +6,19 @@ let ERROR_HANDLERS = [];
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('{{ROOT_URL}}sw.js', { scope: '{{ROOT_URL}}' })
     .then(function(reg) {
+
+      if (reg.active) {
+        let onUpdate = () => {
+          let newWorker = reg.installing;
+          newWorker.onstatechange = function() {
+            if (newWorker.state === 'activated') {
+              window.dispatchEvent(new Event('newServiceWorkerActivated'));
+            }
+          };
+        };
+        reg.onupdatefound = onUpdate;
+      }
+
       let current = Promise.resolve();
 
       for (let i = 0; i < SUCCESS_HANDLERS.length; i++) {
